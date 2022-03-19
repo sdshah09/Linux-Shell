@@ -1,0 +1,26 @@
+[10:28 AM] Manan Shah
+Static library creation Procedurecalc_mean.c calc_sub.c calc_mean.h main.c Generate object files respectively
+$ gcc -c calc_mean.c -o calc_mean.o
+$ gcc -c calc_sub.c -o calc_sub.o
+$ ls
+calc_mean.o calc_sub.o
+$ar rcs lib_st.a calc_mean.o calc_sub.o
+$gcc -c main.c -o main.o //source code object file
+$gcc -o main main.o -L. lib_sta.a
+$./main
+$gcc -o main main.o -L. -l_st
+$./main
+
+[10:44 AM] Manan Shah
+#include <stdio.h>
+#include "calc_mean.h"int main(int argc, char *argv[])
+{
+double v1,v2,m1,m2;
+v1 = 5.2;
+v2 = 7.9;
+m1 = mean(v1,v2);
+m2 = sub(v1,v2);
+printf("The mean of %3.3f and %3.2f is %3.2f\n", v1,v2,m1);
+printf("The substraction of %3.3f and %3.2f is %3.2f\n", v1,v2,m2); return 0;
+}
+
