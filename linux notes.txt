@@ -1,0 +1,695 @@
+linux can run many processes concurrently...
+
+linux provides independent enviornment
+
+linux uses an algorithm called as delayed reusage of pids->sme pid can be used for the process which has been terminated first and then gernerated
+
+pid = 0 is called core kernel process(swapper process)
+
+pid = 1 init process(user level process) [during bootup time] pid = 0 parent of pid = 1
+
+init is a parent of all processes running in the computer and works at multiprocessor level.
+
+getpid() calling process pid
+
+getppid() to get parent process pid
+
+P4rocess stages has 5 stages
+1. when a prcoess is new it is called into newstate where it is getting prepared
+2. Exxecute state is running and handled by CPU
+
+1. new
+2.ready
+3.scheduler
+4.execution
+5.termination
+
+Process queues consist of 1. ready queue && 2. wait queue 
+i.e. ready queue is linked list of processes and it is allocated per fCPU core.
+Wait queue are per resources i.e. resources are peripherals. // peripherals are i/p,i/o,o/p
+
+fork()  creates  a  new process by duplicating the calling process.  The new process is referred to as the child process.  The calling process is referred to as the parent process.
+
+The child process and the parent process run in separate memory spaces.   At  the  time  of
+fork()  both  memory spaces have the same content. Number of fork = 2^n number of processes....
+CTRL+C to exit fork process....
+scheduler decide which process to execute first on the basis of load on system.
+
+Process Termination 
+1. return 0; -> main() ends - normal
+2. exit(0); -> terminate the code -normal
+3. CTRL+C - abnormal termination
+
+Zombie process: a process terminated and waiting for parent to fetch/read the exit status ofthe terminated child process , such a process enters a state called zombie state and process called zomie process
+
+when a process executes an exact porgram the process program is replaced with abrand new program from the hard disc and new program start.
+
+
+All  of  these  system  calls  are used to wait for state changes in a child of the calling
+process, and obtain information about the child whose state has changed.(waitpid)
+
+Waitpid->If the child is termninated it will return the termination process of child
+
+ateexit()->The atexit() function registers the given function to be called
+       at normal process termination, either via exit(3) or via return
+       from the program's main(). and it can execute upto 32 calls. The order of executions of functions are reverse of their registration. After normal process termination exit routine is making the function calls that are previously registered for the process by atexit() function.
+       
+
+When a process is created kernel has to allocate lots of resources and as to initialize all the resources in order to make yur process active is the disadvantage of fork().
+
+Thread-> it is a parallel context of  execution. it is defined to perform a specifc task.
+
+Multithreading -> is a specialized form of multitasking and a multitasking is the feature that allows your computer to run two or more programs concurrently.
+
+Threads are of two types -> 1. User level threads 2. Kernel Level threads.
+
+Creating maintaining and destroying threads is far cheaper than compare to process in terms of kernel processes.
+
+Threads maintain own stack as well as own registers.
+Threads have specific data
+They have their own scheduling parsing and priority
+They have their own sigblock and signalsf
+Different OS maintains different thread model.
+All threads can share their data with each other and have access to it.(advantage)
+Advantages of thread:
+	1. Light weight nature
+	2. SHare common process and space.
+	3. The communiucation among threads and process is by default. 
+	4. They do not share stack.
+Disadvantages of thread:
+	A thread is corrupted or having bug then all the threads get corrupted and the whole 	application gets corrupted
+	
+t3 depends upon implementation if t3 never terminates t2 and t1 will never schedule.
+	
+clone(): to launch the thread. in linux which is unique to linux and cannot work on any other OS.
+POSIX - portable operating system interface. Ithas a posix library.
+
+#include <pthread.h>
+1. pthread_t -> it is a data type that is use to hold thread id and also called as thread 			object. 
+2. pthread_self(void);
+pthrea_attr_t -> pthread attributes. this determines behvaiour of the tread.
+
+int pthread_create(pthread_t *thread, const pthread_attr_t *attr,
+                   void *(*start_routine) (void *), void *arg);
+                   
+            pthread_join makes the particular thread to join with main process execution
+            Making the main process wait till termination of your thread.
+Multithreading is very well employed on  multicore operations.
+In case thread needs more number of variables we can use structure
+
+When called from the call fucntion return thread idd
+
+Ways to terminate thread
+1. main->returns
+2. pthread_exit()
+3. pthread_cancel() is a cancellation request made to other threads
+		The argument of pthread cancel is the thread id to terminate.
+		For self termination of thread we use pthread_self() argument in pthread_cancel()
+		
+pthread_attributes talk about the properties of your thread
+Pthread attributes(properties) have 5 different categories
+1. stack management
+2. Thread synchronization
+3. Thread scheduling policy and priority
+4. Thread specific
+5. thread signals.
+
+1.Whenever I want to change the default properties of object we use pthread_attribute_obj
+2. Initialize pthread attribute object
+3. call appropriatepthread attribute functions.(stack related fucntiins).
+4. Create pthread and call the address of object of pthread_attr
+5. A the end of pthread _create function we fetch the attribute project will get our defined values.\
+
+pthread_attr_destroy
+No 2 threads can share same attributes and its object.
+int pthread_attr_setstack(pthread_attr_t *attr,
+             |             void *stackaddr, size_t stacksize);
+             |----->             (The pthread_attr_setstack() function sets the stack address and stack size attributes of the thread attributes object referred to by attr to the values specified in stackaddr and stacksize, respectively. These attributes specify the location and size of the stack that should be used by a thread that is created using the thread attributes object attr.)
+             
+pthread_attr_getstack(ptr,addr,size)
+
+The instructions or code that deals with the accessing of global shared data called as critical sections.
+
+When 2 threads execute critical section at some time leads to race condition.
+
+Thread synchronization:- Linux kernel provides synchronizing locks to safeguard the critical section from n number of thread users.
+Types of locks spinlocks, semaphore locks,mutex locks and atomic locks.
+--------------------------------------------------------------------------------------------
+
+Semaphore lock properties: ->Optimised for non contasion cases.
+			    ->Cannot be integrated with interrupted servics routines(ISR)
+			    ->No issues of priorities(will not support priorites)
+			    ->if second argument(of sem_init) 0 in semaphore that means that 			      the values shared between the threads.
+			    ->if non zero value than shared between processes.
+
+
+Binary Semaphores:-
+The binary semaphores are quite similar to counting semaphores, but their value is restricted to 0 and 1. In this type of semaphore, the wait operation works only if semaphore = 1, and the signal operation succeeds when semaphore= 0. It is easy to implement than counting semaphores. Used to protect limited resource. Take use and giveback.
+
+
+Counting Semaphores:-
+This type of Semaphore uses a count that helps task to be acquired or released numerous times. If the initial count = 0, the counting semaphore should be created in the unavailable state.
+--------------------------------------------------------------------------------------------
+
+Spinlock:- Spin locks are a low-level synchronization mechanism suitable primarily for use on shared memory multiprocessors. When the calling thread requests a spin lock that is already held by another thread, the second thread spins in a loop to test if the lock has become available. When the lock is obtained, it should be held only for a short time, as the spinning wastes processor cycles. Callers should unlock spin locks before calling sleep operations to enable other threads to obtain the lock.
+
+Use the pthread_spin_init(3C) function to allocate resources required to use a spin lock, and initialize the lock to an unlocked state.
+
+pthread_spin_init() Syntax
+int  pthread_spin_init(pthread_spinlock_t *lock, int pshared);
+
+Acquiring a Spin Lock
+Use the pthread_spin_lock(3C) to lock a spin lock. The calling thread acquires the lock if it is not held by another thread. Otherwise, the thread does not return from the pthread_spin_lock() call until the lock becomes available. The results are undefined if the calling thread holds the lock at the time the call is made.
+
+pthread_spin_lock() Syntax
+int  pthread_spin_lock(pthread_spinlock_t *lock);
+
+Unlocking a Spin Lock
+Use the pthread_spin_unlock(3C) function to release a locked spin lock.
+
+pthread_spin_unlock() Syntax
+int  pthread_spin_unlock(pthread_spinlock_t *lock);
+
+if we get stuck in lock and unlock operation of spinlock then we use watchdog timer(wdt to reset it.
+--------------------------------------------------------------------------------------
+
+A watchdog timer (WDT) is a timer that monitors microcontroller (MCU) programs to see if they are out of control or have stopped operating. It acts as a “watchdog” watching over MCU operation. 
+
+by default a thread will be in joinable state.
+
+When threads using pthread_join function after thread termination the resources of the respective thread removed from memory i.e. threads do not need to wait or process trermination. t4 which is independent it has to wait for main process termination because resorces of t4 are not removed even after termination.
+create t4 thread in a detachable state. otherwise you can call a funvtion caled pthread_detach() that will detach t4 and will remove resources.
+
+--------------------------------------------------------------------------------------------
+
+Mutex locks
+
+They are simalar to semaphore with  an usage of count of 1 i.e They are almost same like binary sem.
+
+When lock mutex t has to be unlocked.
+a process or a thread cannot exit while having a lock it has to be unlock and then it can exit.
+
+pthread_mutex_trylock()-> if a thread fails to acquire a lock will terminate or discard itself.
+
+pthread library provide macro to initialize an object or variable type pthread_once_t
+
+macro = pthread_once_int. Initial value can be 0 or 1.
+
+pthread_once()->Establishes a function that will be executed only once in a given process. You may have each thread call the function, but only the first call causes the function to run. This is true even if called simultaneously by multiple threads.
+
+If successful, pthread_once() returns 0.
+
+If unsuccessful, pthread_once() returns -1.
+-----------------------------------------------------------------------------------------
+
+inherit scheduler member is one of your thread scheduler attribute that tells whteher the policy and priority inherited by parent thread. PTHREAD_INHERIT_SCHED or PTHREAD_EXPLICIT_SCHED are inherit scheduler memberss. By default threads have PTHREAD_INHERIT_SCHED as thier member.
+
+PTHREAD_INHERIT_SCHED
+              Threads that are created using attr inherit scheduling
+              attributes from the creating thread; the scheduling
+              attributes in attr are ignored.
+
+ PTHREAD_EXPLICIT_SCHED
+              Threads that are created using attr take their scheduling
+              attributes from the values specified by the attributes
+              object.
+              
+Linux Thread Scheduling priority:-  Real time linux thread have priorites from 1(lowest) to 99(highest)
+
+Priorities come to the picture depending upon the policy .
+3 types of policy
+1. Default
+2. Round Robin
+3  FIFO Schedule
+
+If a policy is default all threads of a process will have same priority.
+all the threads will share CPU's slice time equally
+The system scheduler know how to schedule policies. It does not know hpw to schedule your threads.
+
+Round robin policy depends on time priority,higher the priority threads will get execute first and terminate unless and until low prioritt threads can't schedule.
+
+FIFO:-struct_sched_param is used in code to extend the code for future purpoeses.
+
+Linux operationg system uses a scheduler named CFS complete fair scheduling. Each and every process are not provided with equal proportion of slice time. The proportion of CPU slice time depends upon on a factor called Nice value.
+ nice value gives weightage to the process w.r.t to CPU slice time.
+ 
+ nice value priorterise a particular process. it can increase or decrease priority of a particular process. nice value ranges from -20 to +19 -20 is highest priority and 0 is defaulty priority and 19 is lowest. The lowest priority still getting a CPU slice time.
+ 
+ taskset is a command that will asisgn particular CPU core to a process. it is an utility tool that comes by default with linux distribution. taskset -c 1./nice1 taskset - cpu core -c changing the cpu core 1 is task. & is a special background symbol in a command line that forces the falling command to run in the background.
+ 
+ whenc nv = 0 each process will have slice time of 1/n of a CPU slice time i.e n = number of processes.
+ 
+ 3 types of context 
+ 	1. PROCESS CONTEXT:- Kernel executiing a piece of software on behalf of your process(in the CPU slice time of a process) which has initated the sytem call is called as a process context. By default most of the time  your kernel is to be in process context mode.
+ 	
+ 	2. KERNEL CONTEXT:- kernel executing a kernel service on behalf of different service. These all codes are expected to be highly privileged code. Only in highly privilege code they can access the underline hardware. Your applications which runs in an user space have less privilege and because of this they cannot access the hardware directly.
+ 	
+ 	3. INTERRUPT CONTEXT.:- Kernel executing a  piece of code/ISR function in the contetx of an interrupt. PIC (Programmable interrupt controller). IRQ(interrupt request lines) are shared in case of architecture supporting more devices. WHenever a interrupt occur it will deliver the same interrupt to PIC and it will pass to CPU. Kernel executing a  piece of code/ISR function on behalf of a particular interrupt.
+ 	
+----------------------------------------------------------------------------------------------
+
+LINUX MEMORY MANAGEMENT UNIT(MMU)
+MEMORY MANIPULATION CALLS:-memset() is used to fill a block of memory with a particular value.
+			    The moment it calls memset function goes to address provided by the pointer and start filling the address position with given constant c value for given n number of bytes.On success returns the address on return error -1.
+			    void *memset(void *ptr, int x, size_t n);
+			    
+memchr():-The C library function void *memchr(const void *str, int c, size_t n) searches for the first occurrence of the character c (an unsigned char) in the first n bytes of the string pointed to, by the argument str. 
+
+Syntax:- void *memchr(const void *str, int c, size_t n)
+
+The memrchr() function behaves like memchr(), except that it locates the
+     last occurrence of	c in string b. The moment memcmp is executed the pointer jumps to 2 different buffer location and start comparing addresses byte by byte until they get non matchig data. Once the data is non matching returns ASCII difference of both.
+    
+memmove():-The C library function void *memmove(void *str1, const void *str2, size_t n) copies n characters from str2 to str1, but for overlapping memory blocks, memmove() is a safer approach than memcpy(). in case of source and destination overlapping memmove provide guaranteed results.
+
+memcmp():-The C library function int memcmp(const void *str1, const void *str2, size_t n)) compares the first n bytes of memory area str1 and memory area str2.
+--------------------------------------------------------------------------------------------
+alloca system call or function will allocate memory from stack segement of the process when heap section is full.
+
+when memory allocate using mallocs they provide memory from a pool of fixer sizes resulting memory fragmentation(left over data)
+when alloc used no pool of fixer sizes. can generate memory of any sizes. very little wastage and execution is fast. 
+
+in malloc if free() is not called may lead to memmory leaks and application crash.
+in alloca() no need to call free() call is the greatest advantage .
+----------------------------------------------------------------------------------------
+swap function s supposed to be twice the size of RAM. The swap partition serves as overflow space for your RAM. If your RAM fills up completely, any additional applications will run off the swap partition rather than RAM. inactive processes from RAM are pushed into swap partition. pushing kernel proceesses from RAM is called swap out. kernel pulling process back to RAM region is swap in process.
+
+while swapping kernel should not touch my logging memory or process. in such a case we will apply lock here. 
+mlock Synatx:-int mlock(const void *addr, size_t len);
+mlock(), mlock2(), and mlockall() lock part or all of the calling
+       process's virtual address space into RAM, preventing that memory
+       from being paged to the swap area
+--------------------------------------------------------------------------------------------------
+in a bigger picture data+bss+heap combined called as 'program data segement'
+sbrk()-The sbrk() function is used to change the space allocated for the calling process
+
+Syntax mmap():-
+       void *mmap(void *addr, size_t length, int prot, int flags,
+                  int fd, off_t offset);
+       int munmap(void *addr, size_t length);
+      1st argument-reccomended to take address argument as 0 i.e. while mapping we are requesting the kernel to please mamp the given region with free space in a process address space.
+      
+       mmap() creates a new mapping in the virtual address space of the
+       calling process.  The starting address for the new mapping is
+       specified in addr.  The length argument specifies the length of
+       the mapping (which must be greater than 0). 
+PROC_READ:- read pages
+PROC_WRITE:- write pages
+PROC_EXEC:- execute pages.
+The mmap() function is used for mapping between a process address space and either files or devices. When a file is mapped to a process address space, the file can be accessed like an array in the program.
+The flags argument
+       The flags argument determines whether updates to the mapping are
+       visible to other processes mapping the same region, and whether
+       updates are carried through to the underlying file.  This
+       behavior is determined by including exactly one of the following
+       values in flags:
+1.MAP_SHARED	2.MAP_LOCK	3. MAP_PRIVATE	4.MAP_ANONYMOUS
+
+fstat():-These functions return information about a file. fstat() is identical to stat(), except that the file to be stat-ed is specified by the file descriptor fd.
+
+ mmap is a functin that maps the kernel file memory region or device memory region or random region into calling function address space.
+ ----------------------------------------------------------------------------------------------------
+ Pages are typically 512 to 8192 bytes, with 4096 being a typical value. Page size is virtually always a power of two.
+ 
+Virtual memory is a section of volatile memory created temporarily on the storage drive. It is created when a computer is running many processes at once and RAM is running low.
+ 
+ Linux BOOT Process:-https://www.thegeekstuff.com/2011/02/linux-boot-process/
+ 
+ Linux MMU divided into 2 parts
+ 1. HIGH LEVEL MMU:-independent of processor architecture high level totally isolated irrespective of architecture.
+ 
+ 2. LOW LEVEL MMU:- dependent of processor architecture. when kernel is starting up low level mmu starts creating pges and lots of memory load space.
+ 
+ When CPU is started all of the memory is processed in virtual memory and after CPU converts it into physical memory/address.
+
+When kernel bootup starts many low level services are executing as a part of that low level MMU start executing. low level MMU creates lots of memory data structures. it is creating a memory data address named struct page which is 32 bit out of which 20 bits for page number and 12 bits for offset value. if CPU encounters an instruction int x =10 the page number as well as offset is given to CPU. Out of that CPU fetches the page number and gets the corresponding frame number translated.
+
+per process page table entry maintained in the pcb of process
+PTE:- PTE maintains all the records of process pages. process pages can be of data segment , page segment and heaps. if there is no PTE maintained kernel will never kow where my process is in the memory. PTE identifies that this particular pages is define to this particular process.
+
+Paging is a storage mechanism that allows OS to retrieve processes from the secondary storage into the main memory in the form of pages. In the Paging method, the main memory is divided into small fixed-size blocks of physical memory, which is called frames.
+
+In CPU there is paging unit will have a register named as page table entry pointer. This will have the address kernel page frame relation table. CPU fetches the page number from the virtual address and read the register called page table entry register and get the address kernel page fram relation table, for a given page numer CPU will fetch the respective page number. take the frame number and adds to the offset. will get the physical address of variable int x in memory. fpor every read write instruction CPU has to do this. Logical address->Physical Address.
+
+DEMAND PAGING:- when process created pages are loaded into the memory on demand.
+
+virtual memory is a memory section created temporarily on storage devices. linux uses RAM and virtual memory and assign virtual addresses to the processes.
+
+vmstat -s will provide amount of virtual memory available and amount of virtual memory used bythe kernel.alternated command free. cat /proc/meminfo(alternate)
+
+after issue the command vmstat 'b' is the uninterruptable sleep process. in is interrupt per second. cs is context switch per second. wa is wait time. st is virtual address translation.
+
+Library file is a group of precompiled object files packed in a file called as library files. to avoid rewriting of the code we use library. libraries are of static and dynamic. .
+
+Static library perform static linking durig program compile time.
+Dynaming library done by dynaminc linking during run time it is appended into executable file.
+
+ar rcs lib st.a calc_mean.o calc_sub.o
+ar->archive tool use to generate shared libraries.
+rcs->replace create and symbol->combination of variable and functions of the programs
+lib st->it will update the library file.
+.a-> static library extension.
+---------------------------------------------------------------------------------------------------
+
+
+processor can look into your memory into 2 different ways.
+1. Real mode:- a series of bytes is taken in where each byteis addressed. This mode handles only one task at a time.
+
+2. Proctected mode:- processor looking at memory as blocks. This mode handles multiple task at time. once the system is power on processor is in the rela mode and looking memory as a series of bytes. Executing BIOS code and bootloader code in the real mode whose addresses are provded by the vendor. Once bootloader scan the OS and lads into the RAM and kernel bootup process get starts. Now at this stage processor shifted form real mode to protected mode and  the process is called processor intialization where your processor looks your memory as set of blocks or linked list of pages. OS creating illusion to the processor and making processor look to the memory as set of pages.
+
+dynamic library are also called shared objects
+-fpic:- position independent code. dynamic memories should be relocatable i.e. this library instructions must be ready to get loaded into any other memory location in any process address space i.e. the address of library instructions must be changeable.
+
+ldd is a linux command line tool that will tell what are shared library dependencies for your executable file.
+
+export LD_LIBRARY_PATH:- this is to inform the linker where to find the library.
+---------------------------------------------------------------------------------------------------
+
+Debugging tools: - GDB, GNU Debugger, GNU project.
+GDB allows to probe the source code while the program is in the execution. When a crash occurs it also allows us to get the exact reason for the crash. GDB is free software a command linetool that oprates on executable files produced by compilation process. It is apowerful debugging tool for C language and also supports other languages such as C++,JAVA,PAscal,FORTON and Python.
+
+-g is adding debugging inofrmation to executable file. SYmbols are variables and functions of the source code.
+
+gdb --quiet ./a.out:- to skip the information about gdb
+
+breakpoints:- in order to pause your execution breakpoints are applied from the gdb command line. breakpoints are applied using function name or line numbers.
+
+p buff:- it will give the data of the variable.
+l or list:- both commands to list out the code in gdb debugger.
+step:- step will step into the funtion and calling other function it will go to that other function and will execute the function
+info locals:- giving values of all local variables.
+
+while executing with gcc compiler will never check of memory violations and generating the executable file. malloc never generated 2gb of memory, malloc returned NULL.
+
+backtrace or bt:- it will backtrace the function of the program. For example fun x->fun y->fun z. after calling backtrace fun z->fun y ->fun x
+
+//1. r emb linux kernel program:- to pass the arguments and running the programs in gdb
+//2. gdb --args ./a.out linux kernel program:- pass arguments from the start 
+//3. set args one two three:- it is the third way to provide arguments in gdb.
+next:- it will simply execute the function and come out.
+---------------------------------------------------------------------------------------------------
+
+if we observe real time debug examples most of the time the bugs are from the user's POV. Accidentally de-referncing a NULL pointer,de-referencing a pointer which is uninitialized,de-refercing a pointer which is already freed up and accessing memory beyond your lower boundary region.
+
+Accessing a memory region which is beyond your upper boundary region. 
+
+Segmentation fault:- When a program is generated and block of  memory allocated to the process is known as proccess address. Now my program is suppose to access is allocated process address. If program is violating the process address that leads to segmentation fault. processors will get logical address and mapping into physical address. If the logical address is invalid CPU giving same invalid address to kernel. Kernel fails to provide the invalid address. CPU will deliver page fault error to the kernel. now the kernel will check for the data segmentation and then send a signal to the adresss named as SIGSEGV Signal as segmentation fault. On reception of the signal program aborts.  
+
+GDB fails to solve heap memory locations. compiler is not checking for the memory allocations. Even gdb failed to check memory allocations.
+
+glibc is a standard C library has got its own implementaion of malloc,calloc and realloc. Problem with standard dynamic allocations,allocate more meory tahan we request for. In normal desktop PC machines it's not a problem or abug. But the same thing happends tobe in real time embedded applications, then it's a serious bug. electric fence is not a debugging tool but memory profiling library. Electric fence has its own implemntaion of malloc and calloc memory allocations calls. malloc and calloc of electric fence will allocated the given memory that is requested for.
+
+electric fence is configured to find out either upper boundary memory violations or lower boundary memory violations,but not both at a time. Because it's only a library not a stand alone debugger.
+
+valgrind is a runtime tool. It is used to trap down heap memory violations also called as memory profiling tool. valgrind is a stand aone debugger that is used at runtime. When we use default glibc malloc and calloc valgrind will show why this process has failed.
+
+memory padding:- on a 32 bit architecture machine the address bus is 4 bytesand when CPU is trying to fetch a character data, the data on the address bus will never move until all 4 bytes are filled. OS will ad unmeaningful values to th = =e address bus and data on address bus drives and CPu removes unmeaningful value and fetched the required data and process called as memory padding.
+same memory padding is applied to structure which is called structure padding
+
+Structure paddings:- adds one or more empty bytes between the memory addresses to align the data in the memory
+-----------------------------------------------------------------------------------------------------
+23/3/22
+
+MAKEFILE:-
+Makefile is a program building tool used in linux. mkaefile is a set of commands that are similar to commands that run from terminals. the only difference is makefile has organized instructions stored as text file. It should be made in current directory with uppercase M notation. makefile contains a procedure from program execution build.
+
+Entire Linux Kernel OS is build into kernel build system(the resident kernel system).
+
+subsytem also needs a kernel build makefile.
+
+kernel build developers will be working on kernel build makefile system.
+
+Linux supporting differemt architectures.
+
+/lib/modules/5.13.0-37-generic/build/arch/:-linux supporting different type of architectures.
+
+makefile can contain variables,single or multiple targets.
+What are targets?
+Targets are the filenames that are generated by makefile program. A target can be executable file name or it can be object files or it can be simple action command such as clean
+
+There is a linux utility tool called make that comes by default with linux distribution. The primary job of maketool is to execute the makefile. Going to makefile executing the instructions of makefile(makefile contains targets and variables).
+
+make will breakdown large project code into small pieces of code and will assess the small piece of code whether it requires recompilation or not. 
+
+kernel servies do not have gcc
+
+internally make is executing gcc compiler. to post a comment in makefile we use "#"
+
+if i want to compile an individual file then compilation becomes easier.
+
+int system(fork+execl()+wait)
+int sytem(const char *command)->if no arguments passed then error=little arguments passed.
+if return value of system function is 1 then it will inofrm that shell is available
+----------------------------------------------------------------------------------------------------
+
+24-3-22
+
+Android Linux is best example of embedded Linux.
+Embedded Linux is compact customised Linux OS.
+System function callled will not return until the execution of the Shell command.
+
+pthread_attr_getstack
+
+coomand line arguments are on the top of the stack.
+
+A deadlock is a situation in which two computer programs sharing the same resource are effectively preventing each other from accessing the resource, resulting in both programs ceasing to function. 
+
+Semaphore lock:- if lock fails it will be in wait state
+Spinlock:- if lock fails it will be in spin mode.
+Mutex lock:- 
+Mutexes are used to protect shared resources. If the mutex is already locked by another thread, the thread waits for the mutex to become available. The thread that has locked a mutex becomes its current owner and remains the owner until the same thread has unlocked it.
+
+Mutex condition variables: 
+Initialize a condition variable :- "pthread_cond_init(3THR)"
+
+Block on a condition variable :- "pthread_cond_wait(3THR)"
+
+pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
+
+Thread has executed the mutex lock.
+Thread is expecting some condition to happen until that condition happends thread has to sleep here
+. Therefore pthread_cond_wait is called which take 2 arguments. The first argument is the condition on which has to wait and the second is mutex object.
+
+int pthread_cond_broadcast(pthread_cond_t *cond):-These functions shall unblock threads blocked on a condition variable.
+
+The pthread_cond_broadcast() function shall unblock all threads currently blocked on the specified condition variable cond.
+
+Policy classified into 3 categoriies
+1. Default-> default scheduling policy having dhynamic property nd property will change based on thread behaviour.	
+2. FIFO->SCHED_FIFO will have priorities between 1 to 99. SCHED_FIFO will run1priortiy with number 		1 first. FIFO threads execute or terminate or else suspended will not allow  others to 		schedule and exit.
+3. Round Robin-> SCHED_RR all threads execute for equal amount of time without having priorities.
+----------------------------------------------------------------------------------------------------
+
+25-3-22
+
+PRocess runs at their own independent enviornment. It has got its own address spaces and its resources. In a large application there could be n number of processes running. Each process is designed to hand in a seperate a task. At times these processes need to communicate with each other.
+
+For process comunication it is never reccommended a process x to interfere into the address space of process y or communication between process x ad process y. For that Linux has provided techniques called as inter process commmunication(IPC). Communication can be between single machine or over the  netwro A communication between the processes in a single machine is called as IPC. The communication between the processes of the network is called as network communication. FOr network communication request 32 Bit address and 16 bit port address.
+
+IP addresses are use to identify the nodes in the network and also use to connect their communciation. 16 bit port numbers are used for identify a process within the node.
+
+Communication are divided into 2 types:
+1. COnnection Oriented 	2.COnnectionless Oriented.
+
+HTTP client program is a client process connecting to HTTP Server i.e Google
+POP(post office program) is a client process program.
+
+Linux provides 5 different interprocess communication.
+
+1.PIPE->Pipe is a serial communication device that permits uni dirrectional data transfer. Pipe is used between related processes such as parent and child, but not with any other processes.
+Whatever is written on right end the data in the same order is fetched on a read end. ls process output is connected to right end of your pipe and less process input is connected to read end of your pipe. Internally pipe has got 2 descriptors so it is a special file. one descriptor is used with the right end and other is used with read end. 
+
+pipe created then parent calling fork, child is inheriting the pipe file from its parent i.e is a copy of file descriptor to child process. parent from write end and child reading end from read end. After writing parent is calling for flush operation. Flush operation is immediately data reflected to the read end.
+Pipe capacity is limited. 
+
+2. FIFO:- FIFO are named pipes which has name in the file system and is one of the IPC technique. Communication through FIFO need not to be ruled process and parent and child limitation is overruled.
+mkfifo:-Create named pipes (FIFOs) with the given NAMEs.\
+
+Types of files
+1. Normal  2.Pipe  3. Directory   4. Character Device File  5.BLock  6.Linked File  7.Socket
+
+cat /proc/devices :- will show you active character an dblock devices.
+
+3. MESSAGE QUEUE     
+4. SHARED MEMORY	
+5. SEMAPHORE
+-----------------------------------------------------------------------------------------------------
+
+29-3-22
+
+The moment process execute MKFIFO newfile is created in given path and file is set be entered in file system of Linux Kernel OS.
+FIFO file have all the feature like regularfile.
+Any process cna open FIFO file R?W like any other regular file.
+Condition is both the sides simultaneusly FIFO has been to be opened by processes.
+If process opening of Reading then it will wait for writer to write something.
+peeror will return error messages to standard error devices.
+Using FIFOS simple client server communication protocol can be implemented.
+
+Message queues allow different parts of a system to communicate and process operations asynchronously. A message queue provides a lightweight buffer which temporarily stores messages, and endpoints that allow software components to connect to the queue in order to send and receive messages.
+
+MEssages Queues are linked list of messages in the kernel space. Each and every message queue are identified by a unique identifier and called as message queue id. When a message ueue is created OS will return the message queue id called the message queue. Each and every message queue is associated with a structure called as struct mssqid_ds structure.  struct mssqid_ds structure talks about complete statistics pof the respective message queue. The permissions of message queue
+
+create message queueuing system call<sys/msg.h>
+The moment process executes message get fucntioned and message queue is created in the kernel space and unique id allocated and also a structure called msqid_ds is getting allocated and initialized.s
+
+whenever requesting resources such as shared memory,message queues and semaphores from the linux operating system . The OS requjires a key type key_t which is internally integer type. This is defining <sys/types.h>. On usage of key on success the OS will allocate the resource with the unique ID. This key is agreed between sender and receiver(client and server) and this is the first step for constructing a client server,framework ffor an application. A message can have multiple readers and writers. 
+
+int msgsnd(int msgid, const void *msgp, size_t msgsz, int msgflg);
+The msgsnd() function is used to send a message to the queue associated with the message queue identifier specified by msgid.
+
+in 4the argument if flag is not use if the message queue is full messang send operation will get blocked
+
+The argument msgp points to a user-defined buffer that must contain first a field of type long int that will specify the type of the message, and then a data portion that will hold the data bytes of the message. The structure below is an example of what this user-defined buffer should look like:
+-----------------------------------------------------------------------------------------------------
+
+30-3-22
+
+Shared memory allows 2 or more process to access a given region of memory and is the fastest IPC communication technique compared to all. No need to jum memory location to other per data transmission between sender and receiver process, instead of that the given shared region is mapped into respective process address space.
+
+A common data required by mltiple processes, so a database created and mapped in the shared memory region, so that all the process and the threads of the respective process can access common database. Implementation of database is specific to hardware base OS.  
+
+Shared memory can be used between client and server communication,only trick is needed synchronising access to given shared memory region(semaphores can be used)
+System call is (shmget)
+shmget()  returns  the identifier of the System V shared memory segment
+       associated with the value of the argument key.  It may be  used  either
+       to  obtain the identifier of a previously created shared memory segment
+       (when shmflg is zero and key does not have the value  IPC_PRIVATE),  or
+       to create a new set.
+       
+-----------------------------------------------------------------------------------------------------
+
+31-3-22
+
+System calls do not belong t user space. System calls are kernel specific system functions. System calls are invoke from the user space to call appropriate kernell services. Each and every system call passes through a thin layer between user space and kernel space called as system call interface. Each and every system call has a specific dfinition in a kernel space and this is calledon a system call invocation. Each and every device has its own device driver.
+
+There are two devie drivers one w.r.t OS and one on its directly communicating with Hardware
+
+Device driver is a piece of software that communicaetes with the hardware that manages the hardware and brings the end functionality to the user. A device driver from OS side of view resides in the kernel space. Because only in the kernel space driver has underlined priviligesto talk to kernel space and hardware. 
+
+
+Device drive has 2 interfaces.
+1. Interaction with communication
+
+2. Interaction with hardware: It is dependent on hardware application.
+
+3. Interaction with application:- From the application point of view there are 3 kind of implementation
+1. Communciation drive	    2.Block Drive	3.Network Drive
+
+semop() performs operations on selected semaphores in the set indicated
+       by  semid.   Each of the nsops elements in the array pointed to by sops
+       is a structure that specifies an operation to be performed on a  single
+       semaphore.   The  elements of this structure are of type struct sembuf,
+       containing the following members:
+
+semop() changes the value of sempahore.
+int semop(int semid, struct sembuf *sops, size_t nsops);
+
+The  semget() system call returns the System V semaphore set identifier
+       associated with the argument key.  It may be used either to obtain  the
+       
+       identifier  of  a previously created semaphore set (when semflg is zero
+       and key does not have the value IPC_PRIVATE), or to create a new set.
+       
+ semctl()  performs  the  control operation specified by cmd on the Sys‐
+       tem V semaphore set identified by semid, or on the semnum-th  semaphore
+       of that set.  (The semaphores in a set are numbered starting at 0.)
+int semctl(int semid, int semnum, int cmd, ...);
+int semget(key_t key, int nsems, int semflg);
+
+-----------------------------------------------------------------------------------------------------
+
+01-04-2022
+
+Signals are software interrupts. SIgnals are notification to processes that inform some even occured signals are asynchronous that can happen anytime. Process with permission can sedn to the other process or send process to itself.
+
+Application of Signals:-
+Signals are used for synchronising in case of semaphore locks. 
+
+
+Signals can be posted to a process when the system detects a software event, such as a user entering an interrupt or stop or a kill request from another process. Signals can be sent by the kernel when a hardware event such as a bus error or an illegal instruction is encountered.
+
+SIGURG/SIGURG2 are used by the applications. Signals are the event that are triggered to notiy processes. They can be from CPU, kernel or any software . Notification is for the CPU itself to perform some action.
+
+When a network packet arrives on network device, it will trigger interrupt to CpU and CPU runs the appropriate drive and ask to receive the packet and process the packet. When data is ready to transmit over the network, network device trigger interrupt to CPU and again CPU runs the appropriate the network driver to transmit the package.
+
+(SIgnal Handler):-
+Installing and establishing User defined function.
+Instead of executing a default action auser can run user define funciton before that user has to install or establish a signal handler. Signal handler is tonotify the kernel to execute a user defined function when a signal is delivered.
+
+-----------------------------------------------------------------------------------------------------
+
+4-4-22
+
+In kernel we have signal subsystem and is responsible to send sigmnal to each and evry process in the user space. When application 1 has to convey to signal subsytem by giving the application to ID and signal number in which you want to deliver your application to.
+
+On behalf on application 1 signal subsystem will then deliver a signal tp application 2. Applications can register with a timing process. Timing subsytem which correct all CPU time slices. Whenever an event occured will then notify to signal substem. ApplicationX using a alarm function is listing the timings of a system for delivery of SIGALRM signal. When time expires will then notify the signal subsytem and signal subsystem will send a signal to application X. 
+
+Job control signals are managed by kernel to control the process operation. Whenever a process SIGTERM signal, process terminates. During poweroff or shutdown time initiated kernel is broadcating signal sigterm to all the applications. on reception all signals terminated.
+
+SIGCHILD is a signal when child is terminated and notifying the parent about it.
+
+If parent wants to fetch or read the exit status of child prent can call wait and waitpid function.
+
+File descriptors and sockets when they are ready for input an output operation SIGIO signal is generated to respective process.
+
+In a signal subsystem there is a function called as send signal. Send signal function will get execute whenever a signal is to be delivered at the process. 
+
+Steps followed by send_signal()
+-> Send signal will get the reference of PCB to which the signal is to be delivered.
+-> The send signal will access the signal structure of PCB.
+-> There is a pointer of type signal_structure pointing to signal vector of the 64 integers.
+-> send_signal will manipulate the signal structure , for example:- if you want to send a signal 	 called as sigint i.e signal number 2 then it will enable the particular bit corresponding to the signal number. Enabling is the signal that is to be delivered. 
+-> send_signal will rise the CPU exception
+-> exception handler uses second vector i.e. signal handler.
+-> exception handler will look into the particular enable bit into signal structure corresponding to it a function in signal handler vector is executed.
+
+There are some situations where destination process x wants to block particular signals for example process executing a critical situatiin that is updating the database. In this scenario the process does not want to be preampt by kernel, do not want to have context switching. Here process can block particular signals.
+
+Second case:- Process y want to fire the same signal. Kernel will place the particular blocked signal in PCB of process X in that a structure called pending signal placing the blocked signal. This signal is delivered when process X unblocks the signal
+
+sigprocmask() is used to fetch and/or change the signal mask of
+       the calling thread.  The signal mask is the set of signals whose
+       delivery is currently blocked for the caller (see also signal(7)
+       for more details)
+signal ending is kernel holding the signal and delivering the data
+
+-----------------------------------------------------------------------------------------------------
+
+05-04-22
+
+static code analyzer is a process of detecting bugs, errors, defetcs in the source code the process is called static because the code is not running. It is done by analyzing some set of instructions by using some codingstandards proivided by automated tools.
+
+This kind of analysis is helpful to identify the loopholes and waknesses int eh source code.
+
+splint is a static code analyser tool  is use to identify programming errors and bugs and you can take down to find error in suspicious code. 
+
+Google chrome is made on Cl lan and supporting same linker
+-----------------------------------------------------------------------------------------------------
+
+06-4-22
+
+gcov is a test coverage program.  Use it in concert with GCC to analyze
+       your programs to help create more efficient, faster running code and to
+       discover untested parts of your program.  You can use gcov as a
+       profiling tool to help discover where your optimization efforts will
+       best affect your code.  You can also use gcov along with the other
+       profiling tool, gprof, to assess which parts of your code use the
+       greatest amount of computing time.
+
+GRUB stands for Grand unified Bootloader
+
+In bias mode and bootloader mode the CPU is in real mode loking at memory like sequence/series of bytes and the addresses of this are provided by vendor of your motherboard.
+
+GRUB selects the kernel image and load kernel into RAM and giving the complete control to RAM and thereby GRUB stops.
+
+kernel image start image in bootsrap mode and bootstrap mode shift mode into cpu mode
+
+Real mode:- CPU looking at memory in series of bytes
+Protected mode:- CPU looking at memory like pages.
+
+VM Linux start execution and is prereturned to start function called start prereturn naming start_kernel(). It initialises lots of kernel data structure. It will initialise memory data structures. It will initialise memory data,process tables, file related structures and schedules and also kernel threads
+
+gcov is used as a profiling tool which helps us to navigate through entire source code and also can modify or change the souce code.
+
+ gcc -fprofile-arcs -ftest-coverage pipe.c
+ gcov pipe.c
