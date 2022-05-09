@@ -1,0 +1,75 @@
+Linux Commands
+
+Command: Find
+Search for files in the given directory, hierarchically starting at the parent directory and moving to sub-directories.
+You can use the `-iname‘ option to find something regardless of case.
+-->find -name *.sh
+---> find -iname *.sh
+---------------------------------------------------------------------------------------------------
+
+Command: grep
+The ‘grep‘ command searches the given file for lines containing a match to the given strings or words. Search ‘/etc/passwd‘ 
+Ignore word case and all other combination with ‘-i‘ option.
+Search recursively (-r) i.e. read all files under each directory for a string “127.0.0.1“.
+--->grep -i TECMINT /etc/passwd 
+---->grep -r "127.0.0.1" /etc/ 
+--------------------------------------------------------------------------------------------------
+
+Command: ps
+ps (Process) gives the status of running processes with a unique Id called PID.
+---------------------------------------------------------------------------------------------------
+
+Command: whereis
+The ‘whereis‘ command is used to locate the Binary, Sources and Manual Pages of the command. For example, to locate the Binary, Sources and Manual Pages of the command ‘ls‘ and ‘kill‘.
+
+--->whereis ls ---> ls: /bin/ls /usr/share/man/man1/ls.1.gz
+---->whereis kill--->kill: /bin/kill /usr/share/man/man2/kill.2.gz /usr/share/man/man1/kill.1.gz
+
+---------------------------------------------------------------------------------------------------
+
+Command: service
+The ‘service‘ command controls the Starting, Stopping or Restarting of a ‘service‘. This command make it possible to start, restart or stop a service without restarting the system, for the changes to be taken into effect.
+
+-->service apache2 start
+-->service apache2 restart
+---------------------------------------------------------------------------------------------------
+
+Command: alias
+alias is a built in shell command that lets you assign name for a long command or frequently used command.
+
+I uses ‘ls -l‘ command frequently, which includes 5 characters including space. Hence I created an alias for this to ‘l‘.
+--->alias l='ls -l'
+To remove alias ‘l‘, use the following ‘unalias‘ command
+---->unalias l
+
+--------------------------------------------------------------------------------------------------
+
+Command: df
+Report disk usages of file system. Useful for user as well as System Administrator to keep track of their disk usages. ‘df‘ works by examining directory entries, which generally are updated only when a file is closed.
+--->df
+--------------------------------------------------------------------------------------------------
+
+Command: du
+Estimate file space usage. Output the summary of disk usages by ever file hierarchically, i.e., in recursive manner.
+---> du
+-------------------------------------------------------------------------------------------------
+
+Command: lpr
+This command print files named on command line, to named printer.
+
+---> lpr -P deskjet-4620-series 1-final.pdf
+Note: The ‘lpq‘ command lets you view the status of a printer (whether it’s up or not), and the jobs (files) waiting to be printed.
+--------------------------------------------------------------------------------------------------
+
+Command: wget
+Wget is a free utility for non-interactive (i.e., can work in background) download of files from the Web. It supports HTTP, HTTPS, FTP protocols and HTTP proxies.
+-->wget http://downloads.sourceforge.net/project/ffmpeg-php/ffmpeg-php/0.6.0/ffmpeg-php-0.6.0.tbz2
+
+--------------------------------------------------------------------------------------------------
+
+Awk Command
+Awk is a scripting language used for manipulating data and generating reports. The awk command programming language requires no compiling and allows the user to use variables, numeric functions, string functions, and logical operators. 
+
+https://www.geeksforgeeks.org/awk-command-unixlinux-examples/
+
+--------------------------------------------------------------------------------------------------
